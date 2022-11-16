@@ -17,6 +17,9 @@ export const handler = middy(
     if (todos.count !== 0) {
       return{
         statusCode: 201,
+        headers: {
+          'Access-Control-Allow-Origin': '*'
+        },
         body: JSON.stringify({
           items: todos
         })
