@@ -16,8 +16,7 @@ export class TodoAccess {
 
     constructor(
       private readonly docClient: DocumentClient = createDynamoDBClient(),
-      private readonly  todosTable = process.env.TODOS_TABLE,
-      private readonly bucketName = process.env.ATTACHMENT_S3_BUCKET) {
+      private readonly  todosTable = process.env.TODOS_TABLE) {
     }
 
 
@@ -25,14 +24,13 @@ export class TodoAccess {
 
       logger.info("Delete a Todo Item for todoId", todoId)
 
-      const deleteTodoQuery = {
-          TableName: this.todosTable,
-          Key: {
-              "userId": userId,
-              "todoId": todoId
-          },
-      }
-      await this.docClient.delete(deleteTodoQuery).promise()
+      await this.docClient.delete({
+        TableName: this.todosTable,
+        Key: {
+            "userId": userId,
+            "todoId": todoId
+        },
+    }).promise()
       logger.info("Todo item with id of ", todoId, " has been deleted")
   }
 
@@ -46,41 +44,38 @@ export class TodoAccess {
         "userId": userId,
         "todoId": todoId,
       },
-      UpdateExpression: "set #na = :na, #du = :du, #do = :do",
+      UpdateExpression: "set #todoName = :todoName, #dueDate = :dueDate, #done = :done",
       ExpressionAttributeNames: {
-          "#na": "name",
-          "#du": "dueDate",
-          "#do": "done"
+          "#todoName": "name",
+          "#dueDate": "dueDate",
+          "#done": "done"
       },
       ExpressionAttributeValues:{
-          ":na": todoUpdate.name,
-          ":du" : todoUpdate.dueDate,
-          ":do" : todoUpdate.done
+          ":todoName": todoUpdate.name,
+          ":dueDate" : todoUpdate.dueDate,
+          ":done" : todoUpdate.done
       },
       ReturnValues: "ALL_NEW"
     }).promise()
     logger.info("Todo Item has been updated")
 }
   
-    async createAttachmentPresignedUrl(todoId: string, userId: string){
-       const attachmentUrl = `https://${this.bucketName}.s3.amazonaws.com/${todoId}`
+    async createAttachmentPresignedUrl(todo: TodoItem){
         
-      logger.info("Creating attachmentUrl for todoId ", todoId)
-
-      const dbQuery = {
-          TableName: this.todosTable,
-          Key:{
-              "todoId": todoId,
-              "userId": userId
-          },
-          UpdateExpression: 'set attachmentUrl = :attachmentUrl',
-          ExpressionAttributeValues: {
-              ':attachmentUrl': attachmentUrl
-          }
-      }
-
-      logger.info("Todo attachmentUrl has been updated")
-      await this.docClient.update(dbQuery).promise()
+      logger.info("Creating attachmentUrl for todoId ", todo.todoId)
+    
+      await this.docClient.update({
+        TableName: this.todosTable,
+        Key:{
+            todoId: todo.todoId,
+            userId: todo.userId
+        },
+        UpdateExpression: 'set attachmentUrl = :attachmentUrl',
+        ExpressionAttributeValues: {
+            ':attachmentUrl': todo.attachmentUrl
+        }
+    }).promise()
+    logger.info("Todo attachmentUrl has been updated")
   }
   
     async createTodo(todo: TodoItem): Promise<TodoItem> {

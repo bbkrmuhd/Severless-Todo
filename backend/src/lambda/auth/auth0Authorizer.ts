@@ -15,7 +15,6 @@ const logger = createLogger('auth')
 // To get this URL you need to go to an Auth0 page -> Show Advanced Settings -> Endpoints -> JSON Web Key Set
 const jwksUrl = 'https://dev-q0e0v7kznvmtx21l.eu.auth0.com/.well-known/jwks.json'
 
-// const clientSecret = '44G3ZF2EpBzR3CIxzOSWv3OCcPV2fPNtetC7ZN1L75X07uAkogzh0myIEB2RE0gD'
 
 export const handler = async (
   event: CustomAuthorizerEvent

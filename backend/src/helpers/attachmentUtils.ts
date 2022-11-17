@@ -1,5 +1,7 @@
-import * as AWS from 'aws-sdk'
-import * as AWSXRay from 'aws-xray-sdk'
+
+
+const AWS = require('aws-sdk')
+const AWSXRay = require('aws-xray-sdk')
 
 const XAWS = AWSXRay.captureAWS(AWS)
 
@@ -13,11 +15,11 @@ const s3 = new XAWS.S3({
 
 
 
-const todosTable = process.env.TODOS_TABLE
+  const bucket = process.env.ATTACHMENT_S3_BUCKET
 
 export async function getSignedUrl(todoId: string) {
     return await s3.getSignedUrl('putObject', {
-        Bucket: todosTable,
+        Bucket: bucket,
         Key: todoId,
         Expires: 300
       })

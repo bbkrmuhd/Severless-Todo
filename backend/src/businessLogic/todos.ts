@@ -23,8 +23,8 @@ const docClient = new XAWS.DynamoDB.DocumentClient()
 
 const todoAccess = new TodoAccess();
 
-const bucketName = process.env.ATTACHMENT_S3_BUCKET
 const todosTable = process.env.TODOS_TABLE
+const indexTable = process.env.TODOS_CREATED_AT_INDEX
 
 export async function createTodo(
     createTodoRequest: CreateTodoRequest,
@@ -43,7 +43,7 @@ export async function createTodo(
         "name": createTodoRequest.name,
         "dueDate": createTodoRequest.dueDate,
         "done": false,
-        "attachmentUrl":`https://${bucketName}.s3.amazonaws.com/${todoId}`,
+        "attachmentUrl": "",
        })
 
 
@@ -62,11 +62,9 @@ export async function updateTodo (
   return todoAccess.updateTodo(todoUpdate, todoId, userId)   
 }
 
-export async function createAttachmentPresignedUrl(userId: string, todoId: string) {
-  return await todoAccess.createAttachmentPresignedUrl(userId, todoId)
+export async function createAttachmentPresignedUrl(todoItem: TodoItem) {
+  return await todoAccess.createAttachmentPresignedUrl(todoItem)
 }
-
-
 
 export async function getTodosForUser(userId: string) {
         const result = await docClient.query({
@@ -80,3 +78,20 @@ export async function getTodosForUser(userId: string) {
       
         return result.Items
       }
+
+
+export async function getTodoById(todoId:string) :Promise<TodoItem>{ 
+
+        logger.info("Getting a todo Item by todoId")
+    
+        const resultSet = await docClient.query({
+          TableName: todosTable,
+          IndexName: indexTable,
+          KeyConditionExpression: 'todoId = :todoId',
+          ExpressionAttributeValues:{
+              ':todoId':todoId
+          }
+      }).promise()
+
+        return resultSet.Items[0] as TodoItem
+    }

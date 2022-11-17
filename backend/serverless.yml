@@ -123,7 +123,7 @@ functions:
     handler: src/lambda/http/updateTodo.handler
     events:
       - http:
-          method: put
+          method: patch
           path: todos/{todoId}
           cors: true
           authorizer: Auth
@@ -174,7 +174,7 @@ functions:
           method: post
           path: todos/{todoId}/attachment
           cors: true
-          # authorizer: Auth
+          authorizer: Auth
     iamRoleStatements:
     - Effect: Allow
       Action:
@@ -234,14 +234,7 @@ resources:
                 KeyType: RANGE
             Projection: 
               ProjectionType: ALL
-        # onlyBody:
-        #   Type: AWS::ApiGateway::RequestValidator
-        #   Properties:
-        #     Name: 'only-body'
-        #     RestApiId:
-        #       Ref: ApiGatewayRestApi
-        #     ValidateRequestBody: true
-        #     ValidateRequestParameter: false
+
     # TODO: Complete the bucket properties below. 
     # Do not forget to add the CorsConfiguration propoerty
     # TODO: Complete the bucket properties below. 
@@ -284,6 +277,6 @@ resources:
             - Sid: PublicReadForGetBucketObjects
               Effect: Allow
               Principal: '*'
-              Action: 's3:GetObject'
+              Action: 's3:*'
               Resource: 'arn:aws:s3:::${self:provider.environment.ATTACHMENT_S3_BUCKET}/*'
         Bucket: !Ref AttachmentsBucket
