@@ -20,7 +20,7 @@ return {
       'Access-Control-Allow-Origin': '*'
     },
     body: JSON.stringify({
-      newItem
+      item: newItem
     })
   }
   }

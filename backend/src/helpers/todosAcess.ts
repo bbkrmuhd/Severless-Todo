@@ -16,7 +16,8 @@ export class TodoAccess {
 
     constructor(
       private readonly docClient: DocumentClient = createDynamoDBClient(),
-      private readonly  todosTable = process.env.TODOS_TABLE) {
+      private readonly  todosTable = process.env.TODOS_TABLE,
+      private readonly indexTable = process.env.TODOS_CREATED_AT_INDEX) {
     }
 
 
@@ -59,6 +60,35 @@ export class TodoAccess {
     }).promise()
     logger.info("Todo Item has been updated")
 }
+      async getTodosForUser(userId: string) {
+        const result = await this.docClient.query({
+          TableName: this.todosTable,
+          KeyConditionExpression: 'userId = :userId',
+          ExpressionAttributeValues: {
+            ':userId': userId
+          },
+          ScanIndexForward: false
+        }).promise()
+
+        return result.Items
+      }
+
+      async  getTodoById(todoId:string) :Promise<TodoItem>{ 
+
+        logger.info("Getting a todo Item by todoId")
+    
+        const resultSet = await this.docClient.query({
+          TableName: this.todosTable,
+          IndexName: this.indexTable,
+          KeyConditionExpression: 'todoId = :todoId',
+          ExpressionAttributeValues:{
+              ':todoId':todoId
+          }
+      }).promise()
+
+        return resultSet.Items[0] as TodoItem
+    }
+
   
     async createAttachmentPresignedUrl(todo: TodoItem){
         
@@ -77,6 +107,8 @@ export class TodoAccess {
     }).promise()
     logger.info("Todo attachmentUrl has been updated")
   }
+
+  
   
     async createTodo(todo: TodoItem): Promise<TodoItem> {
       await this.docClient.put({

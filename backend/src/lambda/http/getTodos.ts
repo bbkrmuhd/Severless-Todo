@@ -14,7 +14,7 @@ export const handler = middy(
     const userId = getUserId(event)
     const todos = await getTodosForUser(userId)
 
-    if (todos.count !== 0) {
+    if (todos) {
       return{
         statusCode: 201,
         headers: {
