@@ -15,7 +15,7 @@ const s3 = new XAWS.S3({
 
 
 
-  const bucket = process.env.ATTACHMENT_S3_BUCKET
+const bucket = process.env.ATTACHMENT_S3_BUCKET
 
 export async function getSignedUrl(todoId: string) {
     return await s3.getSignedUrl('putObject', {

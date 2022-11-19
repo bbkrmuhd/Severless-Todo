@@ -31,6 +31,10 @@ export async function createTodo(
     const date = new Date().toISOString()
     logger.info("creating todo item")
 
+    if (!createTodoRequest.name) {
+      throw new Error("Todo name must be provided to create todo");
+    }
+
     return  await todoAccess.createTodo({
         "userId": userId,
         "todoId": todoId,
